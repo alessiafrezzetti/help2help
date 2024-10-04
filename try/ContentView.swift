@@ -15,7 +15,7 @@ struct ContentView: View {
                     .imageScale(.large)
                     .shadow(radius: 10)
                     .foregroundStyle(.red)
-                Text("HELP ME")
+                Text("HELP Us")
                     .foregroundStyle(.white)
                     .font(.system(size: 90))
             }
