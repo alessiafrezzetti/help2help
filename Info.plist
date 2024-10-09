@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>bluetooth-central</string>
+		<string>bluetooth-peripheral</string>
+		<string>location</string>
+	</array>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>This app need the access to Bluetooth to send SOS pings to neaby devices</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>This app needs your location even in the background to actively send your coordinates</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app needs your location to get your coordinates</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>This app uses Bluetooth to send SOS messages to nearby users</string>
+</dict>
+</plist>
