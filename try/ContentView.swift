@@ -15,22 +15,24 @@ struct ContentView: View {
             
             
             VStack {
-                HoldButton(text: "hold to get help", duration: 2, background: .black, loadingTint: .white.opacity(0.3))
+                Button(action: {
+                    
+                }) //action
                 {
-                    print ("action")
-                }
-                .foregroundStyle(.white)
-                .padding(.top, 45)
+                    
+                    Circle()
+                        .imageScale(.medium)
+                        .shadow(radius: 10)
+                        .foregroundStyle(.black)
+                        .padding(60)
+                    
+                } //the way it looks
                 
-                /*  Circle()
-                 .imageScale(.medium)
-                 .shadow(radius: 10)
-                 .foregroundStyle(.black)
-                 .padding(60)
-                 } //the way it looks
-                 */
+                
+                 
+                
                 Text("help to be helped")
-                    .foregroundStyle(.black)
+                .foregroundStyle(.black)
                     .font(.system(size: 20))
                     .padding(.top, 60)
             }
@@ -45,11 +47,14 @@ struct ContentView: View {
                     
                     
                     .foregroundColor(.black)
+                
                 }
                 
                 
             }
-        }
+            }
+            
+        
     }
 }
 
