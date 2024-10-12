@@ -11,16 +11,13 @@ struct ContactRow: View {
     
     var contact1: Contact = Contact(name: "alessia", surname: "frezzetti", favouriteColor: .blue)
     
-    
-   
-    var body: some View {
-        HStack {
-            
-            Image(systemName: "person.fill")
-                .foregroundStyle(contact1.favouriteColor)
-            Text(contact1.name + " " + contact1.surname)
-            
-            
+        var body: some View {
+            HStack {
+                Image(systemName: "person.fill")
+                    .foregroundStyle(contact1.favouriteColor)
+                Text("\(contact1.name) \(contact1.surname)")
+                   
+
             
         }
     }
@@ -29,3 +26,4 @@ struct ContactRow: View {
 #Preview {
     ContactRow()
 }
+

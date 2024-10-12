@@ -1,6 +1,10 @@
 import SwiftUI
 
-
+struct ChatMessage: Identifiable {
+    let id = UUID()
+    let text: String
+    let isReceived: Bool // True per i messaggi ricevuti, false per quelli inviati
+}
 
 struct messagesPage: View {
     @State private var chats: [Chat] = [
@@ -17,6 +21,7 @@ struct messagesPage: View {
                     
                         
                         HStack {
+                            
                             Image(systemName: chat.profileImage)
                                 .resizable()
                                 .frame(width: 50, height: 50)
@@ -29,7 +34,9 @@ struct messagesPage: View {
                                 Text(chat.lastMessage)
                                     .font(.subheadline)
                                     .foregroundColor(.gray)
+                                
                             }
+                           
                         }
                     }
                 }
@@ -42,8 +49,11 @@ struct messagesPage: View {
 struct ChatDetailView: View {
     var chat: Chat
     
+    @State private var chats: [Chat] = [
+        Chat(personName: "Mario Rossi", lastMessage: "I'm in danger, please call the cops.", profileImage: "person.fill")]
+    
     @State private var messages: [ChatMessage] = [
-        ChatMessage(text: "Ciao!", isReceived: true)
+        ChatMessage(text: "hello", isReceived:true)
         
       /*  ChatMessage(text: "Come stai?", isReceived: true),
         ChatMessage(text: "Sto bene, grazie! E tu?", isReceived: false)*/
@@ -55,25 +65,20 @@ struct ChatDetailView: View {
         VStack {
             ScrollView {
                 VStack(alignment: .leading) {
+                    
                     ForEach(messages) { message in
-                        HStack {
-                            if message.isReceived {
-                                Text(message.text)
+                        VStack {
+                            Text(chat.personName)
+                                .bold()
+                                .padding(.bottom, 10)
+                            Text(chat.lastMessage)
                                     .padding()
                                     .background(Color.gray.opacity(0.2))
                                     .cornerRadius(10)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                            } else {
-                                Spacer()
-                                Text(message.text)
-                                    .padding()
-                                    .background(Color.blue.opacity(0.2))
-                                    .cornerRadius(10)
-                                    .frame(maxWidth: .infinity, alignment: .trailing)
-                            }
+                                    .frame(maxWidth: .maximum(0, 350), alignment: .leading)
+                                   
                         }
-                        .padding(.vertical, 4)
-                        .padding(.leading, 20)
+                        
                     }
                 }
             }

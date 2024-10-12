@@ -13,3 +13,6 @@ struct Chat: Identifiable {
     let lastMessage: String
     let profileImage: String
 }
+
+
+
