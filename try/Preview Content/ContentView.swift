@@ -44,8 +44,10 @@ struct ContentView: View {
             .toolbar {
                          ToolbarItem(placement: .navigationBarTrailing) {
                              NavigationLink(destination: SettingsPage()) {
+                               
                                  Image(systemName: "gearshape.fill")
                                      .foregroundStyle(.black)
+                                
                              }
                          }
                      }
@@ -80,11 +82,17 @@ struct ContentView: View {
                 holdProgress += 0.1
                 withAnimation(.linear(duration: 0.1)) {
                     buttonScale = 1.0 + holdProgress * 0.3  // Incremento progresivo del tamaño
+                   
                 }
+                
             } else {
-                endLongPressFeedback()  // Finaliza el long press cuando el progreso llega a 1.0
+                endLongPressFeedback()
+                
+               // Finaliza el long press cuando el progreso llega a 1.0
             }
+            
         }
+        
     }
 
     // Finalizar el feedback visual cuando se suelta el botón
@@ -95,10 +103,14 @@ struct ContentView: View {
         holdProgress = 0.0
 
         // Mostrar alerta y restablecer el círculo a su tamaño original
+        
         showAlert = true
         recording = true
+     
         withAnimation(.easeOut(duration: 0.2)) {
-            buttonScale = 1.0  // Restablece el tamaño del círculo
+            buttonScale = 1.0
+            
+            // Restablece el tamaño del círculo
         }
     }
 }
