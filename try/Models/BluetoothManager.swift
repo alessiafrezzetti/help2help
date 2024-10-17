@@ -1,10 +1,3 @@
-//
-//  LocationModel.swift
-//  try
-//
-//  Created by Diego Arroyo on 09/10/24.
-//
-
 import CoreBluetooth
 import CoreLocation
 
@@ -19,105 +12,137 @@ class BluetoothManager: NSObject, ObservableObject, CBPeripheralManagerDelegate,
     @Published var latitude: Double = 0.0
     @Published var longitude: Double = 0.0
     @Published var sosMessage: String = ""
+    var isBluetoothReady = false  // Estado del Bluetooth
+    var notificationManager: NotificationManager? // Agregado para manejar notificaciones locales
     
     override init() {
         super.init()
+        // Inicializar los administradores de Bluetooth y ubicación
         peripheralManager = CBPeripheralManager(delegate: self, queue: nil)
         centralManager = CBCentralManager(delegate: self, queue: nil)
         locationManager = CLLocationManager()
         locationManager?.delegate = self
         locationManager?.requestWhenInUseAuthorization()
-    }
-    
-    // Iniciar escaneo y publicidad de SOS
-    func startBluetoothOperations() {
-        // Iniciar escaneo (Central)
-        startScanningForPeripherals()
         
-        // Obtener ubicación y comenzar a publicitar (Peripheral)
+        // Inicia la obtención de ubicación y el escaneo de dispositivos
         locationManager?.requestLocation()
+        startScanningForPeripherals()
     }
     
-    // Publicitar como Peripheral
-    func advertiseSOS(latitude: Double, longitude: Double) {
+    // Verificación adicional del estado de Bluetooth antes de cualquier operación
+    func advertiseSOS() {
+        guard isBluetoothReady else {
+            print("Bluetooth no está listo para transmitir.")
+            return
+        }
+
         let locationServiceUUID = CBUUID(string: "1234")
         let locationCharacteristicUUID = CBUUID(string: "5678")
-        
+
+        // Creación del mensaje SOS con latitud y longitud
         let sosData = "SOS \(latitude), \(longitude)".data(using: .utf8)
-        
+
+        // Característica que contiene el mensaje SOS
         locationCharacteristic = CBMutableCharacteristic(
             type: locationCharacteristicUUID,
             properties: .read,
             value: sosData,
             permissions: .readable
         )
-        
+
+        // Servicio de Bluetooth para transmitir la característica
         let sosService = CBMutableService(type: locationServiceUUID, primary: true)
         sosService.characteristics = [locationCharacteristic!]
         peripheralManager?.add(sosService)
-        
-        // Publicitar con Bluetooth
-        peripheralManager?.startAdvertising([
-            CBAdvertisementDataServiceUUIDsKey: [locationServiceUUID],
-            CBAdvertisementDataLocalNameKey: "SOS"
-        ])
-        
-        print("Transmitiendo SOS: \(latitude), \(longitude)")
+
+        // Publicitar el mensaje SOS
+        if peripheralManager?.state == .poweredOn {
+            peripheralManager?.startAdvertising([
+                CBAdvertisementDataServiceUUIDsKey: [locationServiceUUID],
+                CBAdvertisementDataLocalNameKey: "SOS"
+            ])
+            print("Transmitiendo SOS: \(latitude), \(longitude)")
+        } else {
+            print("Bluetooth no está listo para publicitar.")
+        }
     }
-    
-    // Escanear como Central
+
+
+    // Escaneo con verificación de estado
     func startScanningForPeripherals() {
-        centralManager?.scanForPeripherals(withServices: [CBUUID(string: "1234")], options: nil)
-        print("Escaneando periféricos cercanos...")
+        guard isBluetoothReady else {
+            print("Bluetooth no está listo para escanear.")
+            return
+        }
+
+        let options = [
+            CBCentralManagerScanOptionAllowDuplicatesKey: NSNumber(value: true)
+        ]
+
+        if centralManager?.state == .poweredOn {
+            centralManager?.scanForPeripherals(withServices: [CBUUID(string: "1234")], options: options)
+            print("Escaneando periféricos cercanos...")
+        } else {
+            print("Bluetooth no está listo para escanear.")
+        }
     }
+
+
     
-    // Delegate requerido para CBCentralManagerDelegate
+    // Actualización del estado de CBCentralManager
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         switch central.state {
         case .poweredOn:
-            print("Central Manager está encendido y listo para escanear.")
+            print("Central Manager listo para escanear.")
+            isBluetoothReady = true
+            startScanningForPeripherals()  // Iniciar escaneo de periféricos
         case .poweredOff:
             print("Bluetooth está apagado.")
+            isBluetoothReady = false
         case .resetting:
-            print("El estado de Bluetooth está siendo reseteado.")
+            print("El estado de Bluetooth se está reseteando.")
+            isBluetoothReady = false
         case .unauthorized:
-            print("La aplicación no tiene permiso para usar Bluetooth.")
+            print("Esta app no tiene permiso para usar Bluetooth.")
+            isBluetoothReady = false
         case .unsupported:
             print("Este dispositivo no soporta Bluetooth.")
+            isBluetoothReady = false
         case .unknown:
             print("El estado de Bluetooth es desconocido.")
+            isBluetoothReady = false
         @unknown default:
             print("Estado desconocido.")
         }
     }
     
-    // Delegate para manejar la actualización de ubicación
+    // Actualización de ubicación
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if let location = locations.first {
             latitude = location.coordinate.latitude
             longitude = location.coordinate.longitude
-            advertiseSOS(latitude: latitude, longitude: longitude)
+            print("Ubicación actualizada: \(latitude), \(longitude)")
         }
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("Error obteniendo la ubicación: \(error.localizedDescription)")
+        print("Error obteniendo la localización: \(error.localizedDescription)")
     }
     
-    // Delegate para Central: cuando se descubre un periférico
+    // Descubrir periféricos cercanos
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         discoveredPeripheral = peripheral
         centralManager?.stopScan()
         centralManager?.connect(peripheral, options: nil)
     }
     
-    // Delegate para Central: cuando se conecta a un periférico
+    // Conectar a periférico cercano
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         peripheral.delegate = self
         peripheral.discoverServices([CBUUID(string: "1234")])
     }
     
-    // Delegate para Central: descubrir servicios
+    // Descubrir servicios del periférico
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         guard let services = peripheral.services else { return }
         for service in services {
@@ -125,7 +150,7 @@ class BluetoothManager: NSObject, ObservableObject, CBPeripheralManagerDelegate,
         }
     }
     
-    // Delegate para Central: cuando se recibe el valor de la característica
+    // Recibir valores de la característica SOS
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
         guard let characteristics = service.characteristics else { return }
         for characteristic in characteristics {
@@ -134,20 +159,48 @@ class BluetoothManager: NSObject, ObservableObject, CBPeripheralManagerDelegate,
             }
         }
     }
-    
+
+    // Actualizar valores recibidos
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+        if let error = error {
+            print("Error al leer el valor de la característica: \(error.localizedDescription)")
+            return
+        }
+
+        // Proceso del mensaje SOS recibido
         if let sosData = characteristic.value, let sosMessage = String(data: sosData, encoding: .utf8) {
             self.sosMessage = sosMessage
             print("Mensaje SOS recibido: \(sosMessage)")
+            
+            // Inmediatamente mostrar la notificación local
+            notificationManager?.showLocalNotification(sosMessage: sosMessage)
+        } else {
+            print("No se recibió ningún dato.")
         }
     }
     
-    // Delegate para Peripheral Manager: cuando se actualiza el estado
+    // Delegate que maneja cambios en los servicios del periférico
+    func peripheral(_ peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) {
+        print("Servicios modificados en el periférico: \(invalidatedServices)")
+
+        // Vuelve a descubrir los servicios después de la modificación
+        peripheral.discoverServices([CBUUID(string: "1234")])
+        
+        for service in invalidatedServices {
+            print("Servicio modificado: \(service.uuid.uuidString)")
+        }
+    }
+
+    
+    // Estado de PeripheralManager
     func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
-        if peripheral.state == .poweredOn {
+        switch peripheral.state {
+        case .poweredOn:
             print("Peripheral Manager listo para transmitir.")
-        } else {
-            print("Bluetooth no está disponible.")
+            isBluetoothReady = true
+        default:
+            print("Bluetooth no disponible para publicidad.")
+            isBluetoothReady = false
         }
     }
 }

@@ -1,63 +1,42 @@
-//
-//  ContentView.swift
-//  try
-//
-//  Created by alessia frezzetti on 04/10/24.
-//
-
 import SwiftUI
 
 struct ContentView: View {
-    // Usamos BluetoothManager para manejar ubicación y operaciones de Bluetooth
-    @StateObject var bluetoothManager = BluetoothManager()
+    @State private var currentOnboardingView = 1
+    @AppStorage("hasSeenOnboarding") var hasSeenOnboarding: Bool = false
 
     var body: some View {
         NavigationStack {
             VStack {
-                if bluetoothManager.latitude != 0.0 && bluetoothManager.longitude != 0.0 {
-                    Text("Coordinates: \(bluetoothManager.latitude), \(bluetoothManager.longitude)")
-                } else {
-                    Text(" ")
-                }
-
-                Button(action: {
-                    // Iniciar la publicidad y escaneo al presionar el botón SOS
-                    bluetoothManager.startBluetoothOperations()
-                }) {
-                    Circle()
-                        .frame(width: 150, height: 150)
-                        .foregroundStyle(.red)
-                        .shadow(radius: 10)
-                        .padding(60)
-                }
-                
-                Text("help to be helped")
-                    .foregroundStyle(.black)
-                    .font(.system(size: 20))
-                    .padding(.top, 60)
-
-                // Mostrar mensajes SOS recibidos
-                if !bluetoothManager.sosMessage.isEmpty {
-                    Text("SOS message from: \(bluetoothManager.sosMessage)")
-                        .foregroundColor(.red)
-                        .padding(.top, 20)
+                if currentOnboardingView == 6 || hasSeenOnboarding {
+                    Homepage(currentOnboardingView: $currentOnboardingView)
+                        .transition(.move(edge: .trailing))
+                } else if currentOnboardingView == 1 {
+                    Onboarding(currentOnboardingView: $currentOnboardingView)
+                } else if currentOnboardingView == 2 {
+                    OnboardingIntro(currentOnboardingView: $currentOnboardingView)
+                } else if currentOnboardingView == 3 {
+                    OnboardingLocation(currentOnboardingView: $currentOnboardingView)
+                } else if currentOnboardingView == 4 {
+                    OnboardingBluetooth(currentOnboardingView: $currentOnboardingView)
+                } else if currentOnboardingView == 5 {
+                    OnboardingData(currentOnboardingView: $currentOnboardingView)
                 }
             }
-
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button(action: {
-                        // Acción del botón de información
-                    }) {
-                        Image(systemName: "info.circle")
-                    }
-                    .foregroundColor(.black)
-                }
-            }
+            .animation(.easeInOut, value: currentOnboardingView)
         }
         .padding()
+        /*.onAppear {
+            // Solicitar permiso de notificaciones al aparecer la vista
+            notificationManager.requestNotificationPermission()
+
+            // Asignar el NotificationManager a BluetoothManager
+            bluetoothManager.notificationManager = notificationManager
+        }*/
+        .navigationBarBackButtonHidden(true)
     }
+
 }
+
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
