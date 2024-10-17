@@ -10,7 +10,7 @@ import SwiftUI
 struct SettingsPage: View {
     
     var body: some View {
-        NavigationStack{
+   
             
             
             VStack{
@@ -19,7 +19,7 @@ struct SettingsPage: View {
                 NavigationLink(destination: faqPage()) {
                     VStack{
                         Image(systemName: "info.circle.fill")
-                        Text ("Faq")
+                        Text ("Infos")
                     }
                 }
                     
@@ -45,7 +45,7 @@ struct SettingsPage: View {
                     
                 }
               
-        }
+       
     }
 }
         

@@ -14,7 +14,7 @@ struct messagesPage: View {
     ]
     
     var body: some View {
-        NavigationView {
+        
             List(chats) { chat in
                 NavigationLink(destination: ChatDetailView(chat: chat)) {
                    
@@ -40,7 +40,7 @@ struct messagesPage: View {
                         }
                     }
                 }
-            }
+           
             .navigationTitle("Your H2H people")
         }
     }

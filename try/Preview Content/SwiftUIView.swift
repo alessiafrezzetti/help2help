@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct ContentView: View {
+struct ContentVieww: View {
     @State var colorButton: Color = .black
     @State private var isLongPressing = false
     @State private var showAlert = false
@@ -49,7 +49,7 @@ struct ContentView: View {
                              }
                          }
                      }
-          /* .alert(isPresented: $showAlert) {
+            .alert(isPresented: $showAlert) {
                 Alert(
                     title: Text("H2H"),
                     message: Text(
@@ -64,7 +64,7 @@ struct ContentView: View {
                         }
                     }
                 )
-            }*/
+            }
         }
     }
 
@@ -104,5 +104,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    ContentVieww()
 }
