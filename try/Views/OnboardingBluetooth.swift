@@ -1,16 +1,16 @@
-import CoreBluetooth
 import SwiftUI
+import CoreBluetooth
 
 struct OnboardingBluetooth: View {
     @Binding var currentOnboardingView: Int
     @State private var bluetoothManager: CBPeripheralManager?
-    @State private var permissionHandled = false
 
     var body: some View {
         VStack {
 
             Spacer()
                 .frame(height: 50)
+            
 
             Spacer()
                 .frame(height: 50)
@@ -20,7 +20,7 @@ struct OnboardingBluetooth: View {
                     .font(.system(size: 18, weight: .bold))
                     .padding(.bottom, 15)
                     .frame(maxWidth: .infinity)
-
+                
                 HStack {
                     Spacer()
                     Image(systemName: "person.2.wave.2.fill")
@@ -37,14 +37,13 @@ struct OnboardingBluetooth: View {
                 .font(.system(size: 16))
             }
             .padding(.horizontal, 40)
-
+            
             Spacer()
 
             Button(action: {
-                bluetoothManager = CBPeripheralManager(
-                    delegate: BluetoothDelegate(
-                        permissionHandled: $permissionHandled
-                    ), queue: nil)
+                // Solicitar acceso a Bluetooth al presionar el botón
+                bluetoothManager = CBPeripheralManager(delegate: BluetoothDelegate(), queue: nil)
+                currentOnboardingView = 5
             }) {
                 Text("Continue")
                     .frame(maxWidth: .infinity)
@@ -54,38 +53,27 @@ struct OnboardingBluetooth: View {
                     .cornerRadius(10)
                     .padding(.horizontal, 40)
             }
-            .disabled(permissionHandled)  // Desactivar botón si el permiso ya fue gestionado
 
             Spacer()
                 .frame(height: 50)
         }
         .padding(.top, 100)
-        .onChange(of: permissionHandled) { newValue in
-            if newValue {
-                currentOnboardingView = 5  // Cambiar de pantalla solo si el permiso ya se ha gestionado
-            }
-        }
     }
 }
 
 class BluetoothDelegate: NSObject, CBPeripheralManagerDelegate {
-    @Binding var permissionHandled: Bool
-
-    init(permissionHandled: Binding<Bool>) {
-        _permissionHandled = permissionHandled
-    }
-
     func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
         switch peripheral.state {
         case .poweredOn:
             print("Bluetooth está activado.")
-            permissionHandled = true  // El usuario ha gestionado el permiso
-        case .poweredOff, .unauthorized, .unsupported:
-            print("El usuario ha rechazado o no puede usar Bluetooth.")
-            permissionHandled = true  // El permiso ha sido gestionado de alguna manera
+        case .poweredOff:
+            print("Bluetooth está desactivado.")
+        case .unauthorized:
+            print("La app no tiene permiso para usar Bluetooth.")
+        case .unsupported:
+            print("Este dispositivo no soporta Bluetooth.")
         default:
             print("Estado desconocido de Bluetooth.")
-            permissionHandled = true  // Gestionamos cualquier otro estado
         }
     }
 }
