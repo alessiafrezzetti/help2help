@@ -24,7 +24,6 @@ struct ContentView: View {
             }
             .animation(.easeInOut, value: currentOnboardingView)
         }
-        .padding()
         /*.onAppear {
             // Solicitar permiso de notificaciones al aparecer la vista
             notificationManager.requestNotificationPermission()

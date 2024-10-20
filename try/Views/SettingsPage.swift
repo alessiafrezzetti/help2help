@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SettingsPage: View {
     @AppStorage("fullName") private var fullName: String = ""
-    @AppStorage("dateOfBirth") private var dateOfBirthString: String = Date().description // Almacena la fecha como String
+    @AppStorage("dateOfBirth") private var dateOfBirthString: String = Date().description
     @AppStorage("sex") private var sex: String = "Male"
     @AppStorage("bio") private var bio: String = ""
     @AppStorage("h2hMessage") private var h2hMessage: String = "I don't feel safe, please reach me or call the cops."
@@ -17,7 +17,6 @@ struct SettingsPage: View {
     @FocusState private var isH2HMessageFocused: Bool
     @EnvironmentObject var bluetoothManager: BluetoothManager
     
-    // Convertir String a Date y viceversa
     private var dateOfBirth: Date {
         get {
             return ISO8601DateFormatter().date(from: dateOfBirthString) ?? Date()
@@ -45,7 +44,7 @@ struct SettingsPage: View {
                         selection: Binding(
                             get: { dateOfBirth },
                             set: { newValue in
-                                updateDateOfBirth(to: newValue) // Llama a la función para actualizar la fecha
+                                updateDateOfBirth(to: newValue)
                             }
                         ),
                         displayedComponents: [.date]
